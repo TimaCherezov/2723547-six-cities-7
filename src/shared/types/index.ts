@@ -1,4 +1,5 @@
 export * from './amenity.type.js';
+export * from './component.enum.js';
 export * from './city.type.js';
 export * from './comment.type.js';
 export * from './coordinates.type.js';
