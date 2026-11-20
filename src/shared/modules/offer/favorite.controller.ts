@@ -1,7 +1,7 @@
 import { inject, injectable } from 'inversify';
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
-import { BaseController, HttpError, HttpMethod, RequestBody, RequestParams } from '../../libs/rest/index.js';
+import { BaseController, HttpError, HttpMethod, RequestBody, RequestParams, ValidateObjectIdMiddleware } from '../../libs/rest/index.js';
 import { Logger } from '../../libs/logger/index.js';
 import { Component } from '../../types/index.js';
 import { OfferService } from './offer-service.interface.js';
@@ -18,8 +18,18 @@ export class FavoriteController extends BaseController {
     this.logger.info('Register routes for FavoriteController…');
 
     this.addRoute({ path: '/', method: HttpMethod.Get, handler: this.index });
-    this.addRoute({ path: '/:offerId', method: HttpMethod.Post, handler: this.addToFavorite });
-    this.addRoute({ path: '/:offerId', method: HttpMethod.Delete, handler: this.deleteFromFavorite });
+    this.addRoute({
+      path: '/:offerId',
+      method: HttpMethod.Post,
+      handler: this.create,
+      middlewares: [new ValidateObjectIdMiddleware('offerId')],
+    });
+    this.addRoute({
+      path: '/:offerId',
+      method: HttpMethod.Delete,
+      handler: this.delete,
+      middlewares: [new ValidateObjectIdMiddleware('offerId')],
+    });
   }
 
   public async index(
@@ -31,7 +41,7 @@ export class FavoriteController extends BaseController {
     this.ok(res, responseData);
   }
 
-  public async addToFavorite(
+  public async create(
     { params }: Request<RequestParams, RequestBody, unknown>,
     res: Response,
   ): Promise<void> {
@@ -49,7 +59,7 @@ export class FavoriteController extends BaseController {
     this.ok(res, responseData);
   }
 
-  public async deleteFromFavorite(
+  public async delete(
     { params }: Request<RequestParams, RequestBody, unknown>,
     res: Response,
   ): Promise<void> {
